@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
+    <meta charsoet="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tr�nh �?c Ebook (�?ng b? Google Drive)</title>
+    <title>Trình Đọc Ebook (Đồng bộ Google Drive)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- JSZip (Y�u c?u cho ePub.js) -->
+    <!-- JSZip (Yêu cầu cho ePub.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- ePub.js -->
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
@@ -16,7 +16,7 @@
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    <!-- Google Identity Services (D�ng d? �ang nh?p) -->
+    <!-- Google Identity Services (Dùng để Đăng nhập) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <style>
@@ -31,7 +31,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
 
-    <!-- Header & Thanh c�ng c? -->
+    <!-- Header & Thanh công cụ -->
     <header class="bg-white shadow-sm border-b border-gray-200 p-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
         <div class="flex items-center gap-4 w-full md:w-auto justify-between">
             <div class="flex items-center gap-3">
@@ -41,12 +41,12 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">Tr�nh �?c S�ch</h1>
-                    <span id="sync-status" class="text-xs font-medium text-gray-500">?? Chua dang nh?p</span>
+                    <h1 class="text-xl font-bold text-gray-800">Trình Đọc Sách</h1>
+                    <span id="sync-status" class="text-xs font-medium text-gray-500">🚫 Chưa đăng nhập</span>
                 </div>
             </div>
 
-            <!-- Khu v?c �ang nh?p Google -->
+            <!-- Khu vực Đăng nhập Google -->
             <div class="flex items-center gap-2">
                 <button id="btn-login-google" onclick="loginGoogle()" class="text-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-2">
                     <svg class="w-4 h-4" viewBox="0 0 48 48">
@@ -55,18 +55,18 @@
                         <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                         <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                     </svg>
-                    �ang nh?p Drive
+                    Đăng nhập Drive
                 </button>
                 <button id="btn-logout-google" onclick="logoutGoogle()" class="hidden text-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 shadow-sm px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-2">
-                    �ang xu?t
+                    Đăng xuất
                 </button>
             </div>
         </div>
         
         <div class="flex items-center gap-2 sm:gap-4 overflow-x-auto pb-1 sm:pb-0 w-full md:w-auto">
-            <!-- �i?u hu?ng trang -->
+            <!-- Điều hướng trang -->
             <div id="controls" class="hidden flex items-center bg-gray-100 rounded-lg p-1 shrink-0">
-                <button id="prev-btn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition" title="Trang tru?c">
+                <button id="prev-btn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition" title="Trang trước">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                 </button>
                 <span id="page-info" class="px-3 text-sm font-medium min-w-[80px] text-center">Trang -</span>
@@ -75,39 +75,39 @@
                 </button>
             </div>
 
-            <!-- N�t Ch?n File & Link -->
+            <!-- Nút Chọn File & Link -->
             <input type="file" id="file-input" accept=".pdf,.epub" class="hidden">
             <button onclick="document.getElementById('file-input').click()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 sm:px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                <span class="hidden sm:inline">M? s�ch</span>
+                <span class="hidden sm:inline">Mở sách</span>
             </button>
             
             <button onclick="openLinkModal()" class="bg-green-50 text-green-600 hover:bg-green-100 px-3 sm:px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                <span class="hidden sm:inline">T? Link Cloud</span>
+                <span class="hidden sm:inline">Từ Link Cloud</span>
             </button>
         </div>
     </header>
 
-    <!-- Khu v?c th�ng b�o l?i (Toast) -->
+    <!-- Khu vực thông báo lỗi (Toast) -->
     <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
-        <span id="toast-message">Th�ng b�o</span>
+        <span id="toast-message">Thông báo</span>
     </div>
 
-    <!-- M�n h�nh ch? (Loading) -->
+    <!-- Màn hình chờ (Loading) -->
     <div id="loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col justify-center items-center z-40 hidden">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
-        <p id="loading-text" class="text-gray-600 font-medium">�ang x? l�, vui l�ng d?i...</p>
+        <p id="loading-text" class="text-gray-600 font-medium">Đang xử lý, vui lòng đợi...</p>
     </div>
 
-    <!-- M�n h�nh ch�nh -->
+    <!-- Màn hình chính -->
     <main class="flex-1 relative overflow-hidden bg-gray-100 flex justify-center items-center">
         <div id="empty-state" class="text-center p-8 max-w-md">
             <div class="bg-gray-200 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             </div>
-            <h2 class="text-xl font-bold text-gray-700 mb-2">Chua c� s�ch n�o du?c m?</h2>
-            <p class="text-gray-500 mb-6 text-sm">H�y dang nh?p Google Drive d? d?ng b? ti?n tr�nh, sau d� m? file d?nh d?ng PDF ho?c EPUB.</p>
+            <h2 class="text-xl font-bold text-gray-700 mb-2">Chưa có sách nào được mở</h2>
+            <p class="text-gray-500 mb-6 text-sm">Hãy đăng nhập Google Drive để đồng bộ tiến trình, sau đó mở file định dạng PDF hoặc EPUB.</p>
         </div>
 
         <div id="epub-viewer" class="hidden bg-white w-full h-full shadow-inner p-4 md:p-8"></div>
@@ -116,37 +116,37 @@
         </div>
     </main>
 
-    <!-- Modal Nh?p Link Cloud -->
+    <!-- Modal Nhập Link Cloud -->
     <div id="link-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-white p-6 rounded-xl w-full max-w-md mx-4 shadow-2xl transform transition-all">
             <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
-                T?i s�ch t? Link
+                Tải sách từ Link
             </h3>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">�u?ng d?n (URL)</label>
-                <input id="link-input" type="url" placeholder="Nh?p link Google Drive, Direct Link..." class="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Đường dẫn (URL)</label>
+                <input id="link-input" type="url" placeholder="Nhập link Google Drive, Direct Link..." class="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1">�?nh d?ng file</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Định dạng file</label>
                 <select id="link-type" class="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    <option value="auto">T? d?ng nh?n di?n</option>
-                    <option value="pdf">S�ch PDF (.pdf)</option>
-                    <option value="epub">S�ch EPUB (.epub)</option>
+                    <option value="auto">Tự động nhận diện</option>
+                    <option value="pdf">Sách PDF (.pdf)</option>
+                    <option value="epub">Sách EPUB (.epub)</option>
                 </select>
             </div>
             <div class="flex justify-end gap-3">
-                <button onclick="closeLinkModal()" class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition">H?y</button>
-                <button onclick="loadFromLink()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition">T?i v� M?</button>
+                <button onclick="closeLinkModal()" class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition">Hủy</button>
+                <button onclick="loadFromLink()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition">Tải và Mở</button>
             </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 1. C?U H�NH GOOGLE DRIVE API & X�C TH?C
+        // 1. CẤU HÌNH GOOGLE DRIVE API & XÁC THỰC
         // ==========================================
-        const CLIENT_ID = '525283300446-5c2qhl5dkducnqaoevnlb9a7i9sn2dl3.apps.googleusercontent.com'; 
+        const CLIENT_ID = '525283300446-kr7c6g9ho426fo0s0n139qcngv0o8htb.apps.googleusercontent.com'; 
         const SCOPES = 'https://www.googleapis.com/auth/drive.appdata'; 
         
         let tokenClient;
@@ -156,7 +156,7 @@
         let syncTimeout = null;
 
         window.onload = function() {
-            // Kh?i t?o Google Identity Services
+            // Khởi tạo Google Identity Services
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
@@ -165,7 +165,7 @@
                         gDriveAccessToken = tokenResponse.access_token;
                         document.getElementById('btn-login-google').classList.add('hidden');
                         document.getElementById('btn-logout-google').classList.remove('hidden');
-                        document.getElementById('sync-status').textContent = '?? �ang t?i d? li?u...';
+                        document.getElementById('sync-status').textContent = '🔄 Đang tải dữ liệu...';
                         document.getElementById('sync-status').classList.replace('text-gray-500', 'text-blue-500');
                         await initDriveStorage();
                     }
@@ -183,21 +183,21 @@
             progressFileId = null;
             document.getElementById('btn-login-google').classList.remove('hidden');
             document.getElementById('btn-logout-google').classList.add('hidden');
-            document.getElementById('sync-status').textContent = '?? �� dang xu?t';
+            document.getElementById('sync-status').textContent = '🚫 Đã đăng xuất';
             document.getElementById('sync-status').classList.replace('text-green-600', 'text-gray-500');
             document.getElementById('sync-status').classList.replace('text-blue-500', 'text-gray-500');
         }
 
         async function initDriveStorage() {
             try {
-                // 1. T�m file ti?n tr�nh trong thu m?c ?n appDataFolder
+                // 1. Tìm file tiến trình trong thư mục ẩn appDataFolder
                 const listRes = await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='reading_progress.json'", {
                     headers: { Authorization: `Bearer ${gDriveAccessToken}` }
                 });
                 const listData = await listRes.json();
                 
                 if (listData.files && listData.files.length > 0) {
-                    // File d� t?n t?i, ti?n h�nh t?i n?i dung
+                    // File đã tồn tại, tiến hành tải nội dung
                     progressFileId = listData.files[0].id;
                     const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${progressFileId}?alt=media`, {
                         headers: { Authorization: `Bearer ${gDriveAccessToken}` }
@@ -208,7 +208,7 @@
                     } catch(e) { cachedProgress = {}; }
 
                 } else {
-                    // Chua c� file, t?o file m?i tinh
+                    // Chưa có file, tạo file mới tinh
                     const createRes = await fetch("https://www.googleapis.com/drive/v3/files", {
                         method: "POST",
                         headers: {
@@ -225,36 +225,36 @@
                     cachedProgress = {};
                 }
 
-                document.getElementById('sync-status').textContent = '? �� k?t n?i Drive';
+                document.getElementById('sync-status').textContent = '✅ Đã kết nối Drive';
                 document.getElementById('sync-status').classList.replace('text-blue-500', 'text-green-600');
 
-                // N?u dang m? s�ch d?, t? d?ng chuy?n d?n trang v?a t?i v?
+                // Nếu đang mở sách dở, tự động chuyển đến trang vừa tải về
                 if (currentBookId && cachedProgress[currentBookId]) {
                     restoreProgress(cachedProgress[currentBookId]);
                 }
 
             } catch (error) {
-                console.error("L?i kh?i t?o Drive:", error);
-                document.getElementById('sync-status').textContent = '?? L?i d?ng b? Drive';
+                console.error("Lỗi khởi tạo Drive:", error);
+                document.getElementById('sync-status').textContent = '⚠️ Lỗi đồng bộ Drive';
                 document.getElementById('sync-status').classList.replace('text-blue-500', 'text-red-500');
             }
         }
 
         function saveProgressToDrive(bookId, progressValue) {
-            // Luu v�o RAM ngay l?p t?c
+            // Lưu vào RAM ngay lập tức
             cachedProgress[bookId] = progressValue;
 
-            if (!gDriveAccessToken || !progressFileId) return; // N?u chua dang nh?p th� kh�ng l�m g� th�m
+            if (!gDriveAccessToken || !progressFileId) return; // Nếu chưa đăng nhập thì không làm gì thêm
 
             const statusEl = document.getElementById('sync-status');
-            statusEl.textContent = '? �ang ch? luu...';
+            statusEl.textContent = '⏳ Đang chờ lưu...';
             statusEl.classList.replace('text-green-600', 'text-blue-500');
 
-            // K? thu?t Debounce: Gom nhi?u l?n l?t trang li�n ti?p th�nh 1 l?n luu d? tr�nh kh�a API Google
+            // Kỹ thuật Debounce: Gom nhiều lần lật trang liên tiếp thành 1 lần lưu để tránh khóa API Google
             clearTimeout(syncTimeout);
             syncTimeout = setTimeout(async () => {
                 try {
-                    statusEl.textContent = '?? �ang t?i l�n Drive...';
+                    statusEl.textContent = '🔄 Đang tải lên Drive...';
                     await fetch(`https://www.googleapis.com/upload/drive/v3/files/${progressFileId}?uploadType=media`, {
                         method: "PATCH",
                         headers: {
@@ -263,16 +263,16 @@
                         },
                         body: JSON.stringify(cachedProgress)
                     });
-                    statusEl.textContent = '? �� luu ti?n d?';
+                    statusEl.textContent = '✅ Đã lưu tiến độ';
                     statusEl.classList.replace('text-blue-500', 'text-green-600');
                     setTimeout(() => { 
-                        if(statusEl.textContent === '? �� luu ti?n d?') statusEl.textContent = '? �� k?t n?i Drive'; 
+                        if(statusEl.textContent === '✅ Đã lưu tiến độ') statusEl.textContent = '✅ Đã kết nối Drive'; 
                     }, 3000);
                 } catch (e) {
-                    statusEl.textContent = '?? L?i khi luu';
+                    statusEl.textContent = '⚠️ Lỗi khi lưu';
                     statusEl.classList.replace('text-blue-500', 'text-red-500');
                 }
-            }, 2500); // �?i 2.5s sau l?n l?t trang cu?i c�ng m?i luu
+            }, 2500); // Đợi 2.5s sau lần lật trang cuối cùng mới lưu
         }
 
         function restoreProgress(savedValue) {
@@ -282,17 +282,17 @@
                 if (p > 0 && p <= totalPdfPages) {
                     currentPdfPage = p;
                     renderPdfPage(currentPdfPage);
-                    showToast(`�� kh�i ph?c trang ${currentPdfPage} t? Google Drive`);
+                    showToast(`Đã khôi phục trang ${currentPdfPage} từ Google Drive`);
                 }
             } else if (activeFileType === 'epub' && epubRendition) {
                 epubRendition.display(savedValue).then(() => {
-                    showToast("�� kh�i ph?c ti?n tr�nh EPUB t? Google Drive");
+                    showToast("Đã khôi phục tiến trình EPUB từ Google Drive");
                 });
             }
         }
 
         // ==========================================
-        // 2. LOGIC TR�NH �?C S�CH
+        // 2. LOGIC TRÌNH ĐỌC SÁCH
         // ==========================================
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -321,7 +321,7 @@
             setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 3000);
         }
 
-        function showLoading(text = "�ang x? l�, vui l�ng d?i...") {
+        function showLoading(text = "Đang xử lý, vui lòng đợi...") {
             loadingText.textContent = text;
             loadingScreen.classList.remove('hidden');
         }
@@ -344,7 +344,7 @@
 
             currentBookId = "local_" + file.name.replace(/[^a-zA-Z0-9]/g, '_') + '_' + file.size; 
             const filename = file.name.toLowerCase();
-            showLoading("�ang d?c file c?a b?n...");
+            showLoading("Đang đọc file của bạn...");
 
             const reader = new FileReader();
             if (filename.endsWith('.pdf')) {
@@ -353,7 +353,7 @@
                 reader.onload = (evt) => loadEPUB(evt.target.result);
             } else {
                 hideLoading();
-                showToast("�?nh d?ng kh�ng h? tr?! Vui l�ng ch?n PDF/EPUB");
+                showToast("Định dạng không hỗ trợ! Vui lòng chọn PDF/EPUB");
                 fileInput.value = '';
                 return;
             }
@@ -361,7 +361,7 @@
         });
 
         // ==========================
-        // X? L� FILE PDF
+        // XỬ LÝ FILE PDF
         // ==========================
         async function loadPDF(typedarray) {
             resetViewer();
@@ -379,7 +379,7 @@
                 totalPdfPages = currentPdf.numPages;
                 currentPdfPage = 1;
 
-                // Ki?m tra ti?n tr�nh d� luu
+                // Kiểm tra tiến trình đã lưu
                 if (cachedProgress[currentBookId]) {
                     currentPdfPage = parseInt(cachedProgress[currentBookId]);
                     if (currentPdfPage < 1 || currentPdfPage > totalPdfPages) currentPdfPage = 1;
@@ -388,13 +388,13 @@
                 renderPdfPage(currentPdfPage);
             } catch (error) {
                 hideLoading();
-                showToast("Kh�ng th? d?c file PDF n�y.");
+                showToast("Không thể đọc file PDF này.");
                 console.error(error);
             }
         }
 
         function renderPdfPage(num) {
-            showLoading(`�ang n?p trang ${num}...`);
+            showLoading(`Đang nạp trang ${num}...`);
             currentPdf.getPage(num).then(page => {
                 const viewport = page.getViewport({ scale: currentPdfScale });
                 pdfCanvas.height = viewport.height;
@@ -411,7 +411,7 @@
         }
 
         // ==========================
-        // X? L� FILE EPUB
+        // XỬ LÝ FILE EPUB
         // ==========================
         function loadEPUB(arrayBuffer) {
             resetViewer();
@@ -442,7 +442,7 @@
                 displayPromise.then(() => { hideLoading(); });
 
                 epubRendition.on("relocated", function(location) {
-                    pageInfo.textContent = 'Trang s�ch'; 
+                    pageInfo.textContent = 'Trang sách'; 
                     if (currentBookId && location && location.start) {
                         saveProgressToDrive(currentBookId, location.start.cfi);
                     }
@@ -450,12 +450,12 @@
 
             } catch (error) {
                 hideLoading();
-                showToast("L?i khi m? file EPUB.");
+                showToast("Lỗi khi mở file EPUB.");
             }
         }
 
         // ==========================
-        // �I?U HU?NG S�CH
+        // ĐIỀU HƯỚNG SÁCH
         // ==========================
         prevBtn.addEventListener('click', () => {
             if (activeFileType === 'pdf' && currentPdf && currentPdfPage > 1) {
@@ -475,7 +475,7 @@
         });
 
         // ==========================
-        // X? L� LINK T? ��M M�Y (Proxy)
+        // XỬ LÝ LINK TỪ ĐÁM MÂY (Proxy)
         // ==========================
         function openLinkModal() { document.getElementById('link-modal').classList.remove('hidden'); }
         function closeLinkModal() { document.getElementById('link-modal').classList.add('hidden'); }
@@ -490,11 +490,11 @@
         async function loadFromLink() {
             let url = document.getElementById('link-input').value.trim();
             const typeOverride = document.getElementById('link-type').value;
-            if (!url) { showToast("Vui l�ng nh?p du?ng d?n URL!"); return; }
+            if (!url) { showToast("Vui lòng nhập đường dẫn URL!"); return; }
 
             closeLinkModal();
-            showLoading("�ang t?i s�ch t? m?ng...");
-            currentBookId = "link_" + btoa(url).replace(/[^a-zA-Z0-9]/g, '').substring(0, 30); // M� h�a URL l�m ID
+            showLoading("Đang tải sách từ mạng...");
+            currentBookId = "link_" + btoa(url).replace(/[^a-zA-Z0-9]/g, '').substring(0, 30); // Mã hóa URL làm ID
 
             try {
                 const processedUrl = processCloudLink(url);
@@ -512,7 +512,7 @@
                     } catch (e) {}
                 }
                 
-                if (!response) throw new Error("Kh�ng th? t?i file qua c�c proxy d? ph�ng.");
+                if (!response) throw new Error("Không thể tải file qua các proxy dự phòng.");
 
                 const arrayBuffer = await response.arrayBuffer();
                 let fileType = typeOverride;
@@ -521,7 +521,7 @@
                     const header = new Uint8Array(arrayBuffer).subarray(0, 4).reduce((acc, val) => acc + val.toString(16), "");
                     if (header.startsWith("25504446")) fileType = 'pdf';
                     else if (header.startsWith("504b0304")) fileType = 'epub';
-                    else throw new Error("Kh�ng th? nh?n di?n d?nh d?ng, vui l�ng ch?n th? c�ng.");
+                    else throw new Error("Không thể nhận diện định dạng, vui lòng chọn thủ công.");
                 }
 
                 if (fileType === 'pdf') loadPDF(new Uint8Array(arrayBuffer));
@@ -529,7 +529,7 @@
 
             } catch (err) {
                 hideLoading();
-                showToast("L?i: " + err.message);
+                showToast("Lỗi: " + err.message);
             }
         }
     </script>
